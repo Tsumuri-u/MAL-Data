@@ -3,7 +3,6 @@ import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
 import json
-from scipy import stats
 
 def init(file):
     df = pd.read_csv(file, low_memory=False)
@@ -140,7 +139,7 @@ def score_members_isekai(file):
     
     fig.write_html("plots/mal_score_over_members_isekai_colored.html")
     
-def isekai_double_gaussian(file):
+def isekai_members_double_gaussian(file):
     df = init(file)
     df = df.dropna(subset=["MEMBERS", "GENRES"])
     df["LOG_MEMBERS"] = np.log(df["MEMBERS"] + 1)
@@ -184,3 +183,47 @@ def isekai_double_gaussian(file):
     )
     
     fig.write_html("plots/mal_isekai_popularity_double_gaussian.html")
+
+def isekai_score_double_gaussian(file):
+    df = init(file)
+    df = df.dropna(subset=["SCORE", "GENRES"])
+    
+    df["ISEKAI"] = df["GENRES"].apply(lambda x: "Isekai" if contains_isekai(x) else "Other")
+    
+    isekai_data = df[df["ISEKAI"] == "Isekai"]["SCORE"]
+    non_isekai_data = df[df["ISEKAI"] == "Other"]["SCORE"]
+    
+    colors = ['#2BCDC1', '#F66095']
+    hist_data = [isekai_data, non_isekai_data]
+    group_labels = ["Isekai", "Not Isekai"]
+    
+    fig = ff.create_distplot(
+        hist_data, 
+        group_labels,
+        colors=colors,
+        bin_size=0.5,
+        curve_type='normal'
+        )
+    
+    fig.update_layout(
+        template="plotly_dark",
+        font=dict(
+            family="Roboto",
+            size=15
+        ),
+        legend=dict(
+            title="Genre",
+            font=dict(size=20, family="Roboto Medium")
+        ),
+        title=dict(
+            text="Score of Isekais vs. Non-Isekais on MAL",
+            x=0.5,
+            xanchor='center',
+            font={
+                'size':25,
+                'family':"Roboto Black"
+            },
+        ),
+    )
+    
+    fig.write_html("plots/mal_isekai_score_double_gaussian.html")

@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 To generate the visualizations, run main.py with arguments for the visualization to generate:
 ```sh
-python main.py plot histogramisekai
+python main.py plot histogramisekaimembers
 ```
 Interactive plots will be stored in the plots directory in the project root. Create it if it doesn't exist.
 
