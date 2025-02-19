@@ -8,6 +8,7 @@ def init(file):
     df = pd.read_csv(file, low_memory=False)
     df["SCORE"] = pd.to_numeric(df["SCORE"], errors="coerce")
     df["MEMBERS"] = pd.to_numeric(df["MEMBERS"], errors="coerce")
+    df = df[df["MEMBERS"] > 0]
     df["GENRES"] = df["GENRES"].str.replace("'", '"')
     df["GENRES"] = df["GENRES"].astype(str).str.replace('\D+', '')
     df["GENRES"] = df["GENRES"].apply(clean_and_parse)
@@ -85,6 +86,62 @@ def score_over_time(file):
     )
     
     fig.write_html("plots/mal_score_over_time_member_colored.html")
+    
+def score_over_members(file):
+    df = init(file)
+    df = df.dropna(subset=["TITLE", "SCORE", "MEMBERS", "START_DATE"])
+    df = df[df['START_DATE'] >= '1960-01-01']
+    df["LOG_MEMBERS"] = np.log(df["MEMBERS"] + 1)
+    df['START_TIMESTAMP'] = df['START_DATE'].astype(np.int64)
+    df["START_TIMESTAMP"] = df["START_TIMESTAMP"] - df["START_TIMESTAMP"].min()
+    
+    fig = px.scatter(
+        df,
+        x="LOG_MEMBERS",
+        y="SCORE",
+        color="START_TIMESTAMP",
+        labels={
+            "MEMBERS": "Members",
+            "SCORE": "Mean Score",
+            },
+        hover_data={"TITLE": True, "SCORE": True, "MEMBERS": True},
+        opacity=0.6,
+        template="plotly_dark",
+        color_continuous_scale="Agsunset"
+    )
+    
+    fig.update_traces(marker={'size': 7})
+    
+    fig.update_layout(
+        font=dict(
+            family="Roboto",
+            size=15
+        ),
+        title=dict(
+            text="MAL Scores vs. Members, Date-colored",
+            x=0.5,
+            xanchor='center',
+            font={
+                'size':25,
+                'family':"Roboto Black"
+            },
+        ),
+        coloraxis_colorbar=dict(
+            title="Date",
+            title_font=dict(size=20, family="Roboto Medium"),
+            title_side="top",
+            tickvals=[]
+        ),
+        xaxis_title_font=dict(size=20, family="Roboto Medium"),
+        xaxis_title=dict(text="Ln(Members)"),
+        yaxis_title_font=dict(size=20, family="Roboto Medium"),
+        yaxis_title=dict(text="Score"),
+        showlegend=False
+    )
+    
+    fig.write_html("plots/mal_score_over_members_date_colored.html")
+    
+    
     
 def score_members_isekai(file):
     df = init(file)
@@ -241,7 +298,8 @@ def isekai_members_double_histogram(file):
         title="Histogram of Isekai vs. Non-Isekai anime on MAL",
         color="ISEKAI",
         category_orders={"ISEKAI": ["Non-Isekai", "Isekai"]},
-        color_discrete_map={"Other": "#00798C", "Isekai": "#D1495B"}
+        color_discrete_map={"Other": "#00798C", "Isekai": "#D1495B"},
+        log_y=True
     )
     
     fig.update_layout(
@@ -265,7 +323,7 @@ def isekai_members_double_histogram(file):
         xaxis_title_font=dict(size=20, family="Roboto Medium"),
         xaxis_title=dict(text="Ln(Members)"),
         yaxis_title_font=dict(size=20, family="Roboto Medium"),
-        yaxis_title=dict(text="Count"),
+        yaxis_title=dict(text="Log(Count)"),
     )
     
     fig.write_html("plots/mal_isekai_popularity_double_histogram.html")
