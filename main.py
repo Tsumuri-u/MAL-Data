@@ -10,7 +10,7 @@ def main():
     scrape_parser = subparsers.add_parser("scrape")
     scrape_parser.add_argument("target", choices=["anime", "manga"])
     plot_parser = subparsers.add_parser("plot")
-    plot_parser.add_argument("target", choices=["test", "scoretime", "scoreisekai", "histogramisekaimembers", "histogramisekaiscore"])
+    plot_parser.add_argument("target", choices=["test", "scoretime", "scoreisekai", "gaussianisekaimembers", "gaussianisekaiscore", "histogramisekaimembers"])
     
     args = parser.parse_args()
     
@@ -26,10 +26,13 @@ def main():
             plotter.score_over_time(anime_data)
         elif args.target == "scoreisekai":
             plotter.score_members_isekai(anime_data)
-        elif args.target == "histogramisekaimembers":
+        elif args.target == "gaussianisekaimembers":
             plotter.isekai_members_double_gaussian(anime_data)
-        elif args.target == "histogramisekaiscore":
+        elif args.target == "gaussianisekaiscore":
             plotter.isekai_score_double_gaussian(anime_data)
+        elif args.target == "histogramisekaimembers":
+            plotter.isekai_members_double_histogram(anime_data)
+            
         
 
 if __name__ == "__main__":

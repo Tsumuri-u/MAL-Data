@@ -227,3 +227,45 @@ def isekai_score_double_gaussian(file):
     )
     
     fig.write_html("plots/mal_isekai_score_double_gaussian.html")
+    
+def isekai_members_double_histogram(file):
+    df = init(file)
+    df = df.dropna(subset=["MEMBERS", "GENRES"])
+    df["LOG_MEMBERS"] = np.log(df["MEMBERS"] + 1)
+    
+    df["ISEKAI"] = df["GENRES"].apply(lambda x: "Isekai" if contains_isekai(x) else "Other")
+    
+    fig = px.histogram(
+        df,
+        x="LOG_MEMBERS",
+        title="Histogram of Isekai vs. Non-Isekai anime on MAL",
+        color="ISEKAI",
+        category_orders={"ISEKAI": ["Non-Isekai", "Isekai"]},
+        color_discrete_map={"Other": "#00798C", "Isekai": "#D1495B"}
+    )
+    
+    fig.update_layout(
+        template="plotly_dark",
+        font=dict(
+            family="Roboto",
+            size=15
+        ),
+        legend=dict(
+            title="Genre",
+            font=dict(size=20, family="Roboto Medium")
+        ),
+        title=dict(
+            x=0.5,
+            xanchor='center',
+            font={
+                'size':25,
+                'family':"Roboto Black"
+            },
+        ),
+        xaxis_title_font=dict(size=20, family="Roboto Medium"),
+        xaxis_title=dict(text="Ln(Members)"),
+        yaxis_title_font=dict(size=20, family="Roboto Medium"),
+        yaxis_title=dict(text="Count"),
+    )
+    
+    fig.write_html("plots/mal_isekai_popularity_double_histogram.html")
