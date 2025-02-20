@@ -327,3 +327,44 @@ def isekai_members_double_histogram(file):
     )
     
     fig.write_html("plots/mal_isekai_popularity_double_histogram.html")
+
+def chars_over_time(file):
+    df = init(file)
+    df = df[df["START_DATE"] >= '1960-01-01']
+    df = df.dropna(subset=["TITLE", "START_DATE"])
+    
+    df["TITLE_LENGTH"] = df["TITLE"].apply(len)
+    
+    fig = px.scatter(
+        df,
+        x="START_DATE",
+        y="TITLE_LENGTH",
+        title="Title Length of Anime over Time",
+        labels={"START_DATE": "Start Date", "TITLE_LENGTH": "Title Length (Characters)"},
+        hover_data={"TITLE": True, "TITLE_LENGTH": True, "START_DATE": True},
+        template="plotly_dark",
+    )
+    
+    fig.update_traces(marker=dict(size=7, color="#c3fa05", opacity=0.7))
+    
+    fig.update_layout(
+        font=dict(
+            family="Roboto",
+            size=15
+        ),
+        title=dict(
+            x=0.5,
+            xanchor='center',
+            font={
+                'size':25,
+                'family':"Roboto Black"
+            },
+        ),
+        xaxis_title_font=dict(size=20, family="Roboto Medium"),
+        xaxis_title=dict(text="Start Date"),
+        yaxis_title_font=dict(size=20, family="Roboto Medium"),
+        yaxis_title=dict(text="Character Count"),
+    )
+    
+    fig.write_html("plots/mal_title_length_over_time.html")
+    
